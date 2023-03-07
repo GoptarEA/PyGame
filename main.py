@@ -1,10 +1,10 @@
 import pygame
 import sys
-from car import Car
+from capitoshka import Capitoshka
 from level_generator import generate_level, load_level, elements_group
 from camera import Camera
 from menu import Play
-
+from background import Background
 
 pygame.init()
 pygame.mixer.init()
@@ -17,19 +17,20 @@ all_sprites_list = pygame.sprite.Group()
 
 menu_play = Play()
 camera = Camera(all_sprites_list, elements_group)
+# cap = Capitoshka()
+
+bg = Background()
 
 
 
 
-car = Car("Sprites/Objects/red_point.png", (300, 400))
 
 
-
-all_sprites_list.add(background)
-all_sprites_list.add(car)
+# all_sprites_list.add(cap)
+all_sprites_list.add(bg)
 all_sprites_list.add(menu_play)
 
-generate_level(load_level('1.txt'))
+# generate_level(load_level('1.txt'))
 pygame.display.update()
 
 
@@ -41,8 +42,9 @@ while running:
             sys.exit()
 
 
-    car.update()
-    camera.update(car)
+    menu_play.update()
+    # cap.update()
+    # camera.update(cap)
 
     all_sprites_list.draw(screen)
     elements_group.draw(screen)

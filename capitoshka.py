@@ -2,18 +2,21 @@ import pygame
 import time
 
 
-class Car(pygame.sprite.Sprite):
-    def __init__(self, image_file, location):
+class Capitoshka(pygame.sprite.Sprite):
+    def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load(image_file)
+        self.image = pygame.image.load("Sprites/Objects/red_point.png")
         self.rect = self.image.get_rect()
         self.rect.w = self.rect.width
         self.rect.h = self.rect.height
-        self.rect.center = location
+        self.rect.center = (300, 400)
         self.gravitation = 3
         self.current_time = time.time()
         self.is_jumping = False
         self.jump_counter = 100
+
+    def animation(self):
+        pass
 
     def update(self):
         # self.rect.y += self.gravitation
