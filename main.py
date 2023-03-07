@@ -15,7 +15,7 @@ pygame.display.set_icon(pygame.image.load('Sprites/Objects/icon.png'))
 
 all_sprites_list = pygame.sprite.Group()
 
-menu_play = Play()
+menu_play = Play('play_small.png', 'play.png', (400, 200))
 camera = Camera(all_sprites_list, elements_group)
 # cap = Capitoshka()
 
