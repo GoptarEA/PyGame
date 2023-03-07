@@ -26,11 +26,7 @@ class Car(pygame.sprite.Sprite):
         elif keys[pygame.K_RIGHT]:
             self.rect.x += 10
         elif keys[pygame.K_SPACE] and not self.is_jumping:
-                self.is_jumping = True
-        elif keys[pygame.K_DOWN]:
-            self.rect.y += 10
-        elif keys[pygame.K_UP]:
-            self.rect.y -= 10
+            self.is_jumping = True
 
     def jump(self):
         if self.jump_counter >= -100:
