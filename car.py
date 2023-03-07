@@ -7,6 +7,8 @@ class Car(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.image.load(image_file)
         self.rect = self.image.get_rect()
+        self.rect.w = self.rect.width
+        self.rect.h = self.rect.height
         self.rect.center = location
         self.gravitation = 3
         self.current_time = time.time()
