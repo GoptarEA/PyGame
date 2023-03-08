@@ -1,5 +1,6 @@
 import pygame
 import sys
+import time
 
 element_images = {
     "grey_point": pygame.image.load("Sprites/Objects/grey_point.png"),
@@ -13,6 +14,69 @@ element_images = {
 element_width = 100
 
 elements_group = pygame.sprite.Group()
+
+buttons_list = []
+
+
+class Button(pygame.Surface):
+    def __init__(self, button_text, color, hovercolor, coords, onclickfunc=None):
+        super().__init__((pygame.font.Font(None, 30).render(button_text, 1, (0, 0, 0)).get_width() + 20,
+                          pygame.font.Font(None, 30).render(button_text, 1, (0, 0, 0)).get_height() + 15))
+        font = pygame.font.Font(None, 30)
+        text = font.render(button_text, 1, (0, 0, 0))
+        self.hovercolor = hovercolor
+        self.coords = coords[0] + 150, coords[1] + 50
+        self.fill(color)
+        self.convert_alpha()
+        self.blit(text, (10, 10))
+
+        self.onclickfunc = onclickfunc
+
+    def click(self, pos):
+        print(pos)
+        print(self.coords)
+        if self.coords[0] <= pos[0] <= self.coords[0] + self.get_width() and \
+                self.coords[1] <= pos[1] <= self.coords[1] + self.get_height():
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+            self.fill(self.hovercolor)
+            self.convert_alpha()
+            self.onclickfunc()
+        else:
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+
+    def hover(self, pos):
+        if self.coords[0] <= pos[0] <= self.coords[0] + self.get_width() and \
+                self.coords[1] <= pos[1] <= self.coords[1] + self.get_height():
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+        else:
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+
+
+class GameRules(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.Surface((500, 300)).convert_alpha()
+        self.image.fill((255, 255, 255, 200))
+        self.rect = self.image.get_rect().move(150, 50)
+
+        font = pygame.font.Font(None, 30)
+        text = font.render("Текст правил игры", 1, (50, 70, 0))
+        self.image.blit(text, ((500 - text.get_width()) // 2, 20))
+        self.button1 = Button("Начинаем", (200, 0, 0, 100), (0, 255, 0, 100), (100, 250), self.start_game)
+        buttons_list.append(self.button1)
+        self.image.blit(self.button1, (100, 250))
+
+        self.button2 = Button("Отбой", (200, 0, 0, 100), (0, 255, 0, 100), (300, 250), self.quit_rules)
+        buttons_list.append(self.button2)
+        self.image.blit(self.button2, (300, 250))
+
+    def quit_rules(self):
+        print("ок, закрылись")
+        menu_play.make_freeze()
+        self.kill()
+
+    def start_game(self):
+        print("Игра началась")
 
 
 class PointElement(pygame.sprite.Sprite):
@@ -57,25 +121,32 @@ class MenuPoint(pygame.sprite.Sprite):
         self.normal_image = pygame.image.load('Sprites/Objects/' + normal_version)
         self.rect.center = coords
 
+        self.freeze = False
+
     def change_size(self, pos):
-        if self.rect.left <= pos[0] <= self.rect.right and self.rect.top <= pos[1] <= self.rect.bottom:
-            self.image = self.normal_image
-            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
-        else:
-            self.image = self.small_image
-            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+        if not self.freeze:
+            if self.rect.left <= pos[0] <= self.rect.right and self.rect.top <= pos[1] <= self.rect.bottom:
+                self.image = self.normal_image
+                pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+            else:
+                self.image = self.small_image
+                pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
-    def update(self):
-        pass
+    def check_click(self, pos):
+        print('Нажалось')
+        if not self.freeze:
+            if self.rect.left <= pos[0] <= self.rect.right and self.rect.top <= pos[1] <= self.rect.bottom:
+                all_sprites_list.add(GameRules())
+                self.make_freeze()
 
+    def make_freeze(self):
+        self.freeze = not self.freeze
+        print(self.freeze)
 
 
 class Play(MenuPoint):
     def __init__(self, small_version, normal_version, coords):
         super().__init__(small_version, normal_version, coords)
-
-    def update(self):
-        super().update()
 
     def start_game(self):
         pass
@@ -85,16 +156,10 @@ class Settings(MenuPoint):
     def __init__(self, small_version, normal_version, coords):
         super().__init__(small_version, normal_version, coords)
 
-    def update(self):
-        super().update()
-
 
 class Records(MenuPoint):
     def __init__(self, small_version, normal_version, coords):
         super().__init__(small_version, normal_version, coords)
-
-    def update(self):
-        super().update()
 
 
 class Background(pygame.sprite.Sprite):
@@ -173,6 +238,10 @@ pygame.display.set_icon(pygame.image.load('Sprites/Objects/icon.png'))
 
 all_sprites_list = pygame.sprite.Group()
 
+# Создание фона игры
+bg = Background()
+all_sprites_list.add(bg)
+
 
 # Создание меню
 menu_play = Play('play_small.png', 'play.png', (400, 200))
@@ -182,13 +251,11 @@ all_sprites_list.add(menu_play)
 all_sprites_list.add(menu_settings)
 all_sprites_list.add(menu_records)
 
-# Создание фона игры
-bg = Background()
-all_sprites_list.add(bg)
 
 
-generate_level(load_level('1.txt'))
 pygame.display.update()
+generate_level(load_level('1.txt'))
+
 
 
 running = True
@@ -197,13 +264,25 @@ while running:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+        if event.type == pygame.MOUSEMOTION:
+            menu_play.change_size(event.pos)
+            menu_records.change_size(event.pos)
+            menu_settings.change_size(event.pos)
+
+            for bt in buttons_list:
+                bt.hover(event.pos)
+
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            for bt in buttons_list:
+                bt.click(event.pos)
 
 
-    menu_play.update()
-    menu_settings.update()
-    menu_records.update()
+            menu_play.check_click(event.pos)
 
+    for sprite in all_sprites_list:
+        sprite.update()
     all_sprites_list.draw(screen)
+
     pygame.display.flip()
     clock.tick(60)
 
