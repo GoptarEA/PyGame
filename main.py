@@ -57,14 +57,17 @@ class MenuPoint(pygame.sprite.Sprite):
         self.normal_image = pygame.image.load('Sprites/Objects/' + normal_version)
         self.rect.center = coords
 
-    def update(self):
-        x, y = pygame.mouse.get_pos()
-        if self.rect.colliderect(pygame.Rect((x, y, x, y))):
+    def change_size(self, pos):
+        if self.rect.left <= pos[0] <= self.rect.right and self.rect.top <= pos[1] <= self.rect.bottom:
             self.image = self.normal_image
-            pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_HAND)
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
         else:
             self.image = self.small_image
-            pygame.mouse.set_system_cursor(pygame.SYSTEM_CURSOR_ARROW)
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+
+    def update(self):
+        pass
+
 
 
 class Play(MenuPoint):
@@ -161,23 +164,6 @@ class Capitoshka(pygame.sprite.Sprite):
             self.is_jumping = False
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 pygame.init()
 pygame.mixer.init()
 clock = pygame.time.Clock()
@@ -187,28 +173,21 @@ pygame.display.set_icon(pygame.image.load('Sprites/Objects/icon.png'))
 
 all_sprites_list = pygame.sprite.Group()
 
+
+# Создание меню
 menu_play = Play('play_small.png', 'play.png', (400, 200))
 menu_settings = Settings('settings_small.png', 'settings.png', (130, 250))
 menu_records = Records('records_small.png', 'records.png', (670, 250))
-
-
-
-# cap = Capitoshka()
-
-bg = Background()
-
-
-
-
-
-
-# all_sprites_list.add(cap)
-all_sprites_list.add(bg)
 all_sprites_list.add(menu_play)
 all_sprites_list.add(menu_settings)
 all_sprites_list.add(menu_records)
 
-# generate_level(load_level('1.txt'))
+# Создание фона игры
+bg = Background()
+all_sprites_list.add(bg)
+
+
+generate_level(load_level('1.txt'))
 pygame.display.update()
 
 
@@ -223,8 +202,6 @@ while running:
     menu_play.update()
     menu_settings.update()
     menu_records.update()
-    # cap.update()
-    # camera.update(cap)
 
     all_sprites_list.draw(screen)
     pygame.display.flip()
