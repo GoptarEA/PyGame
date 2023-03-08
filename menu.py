@@ -10,7 +10,7 @@ class MenuPoint(pygame.sprite.Sprite):
         self.rect.h = self.rect.height
         self.small_image = pygame.image.load('Sprites/Objects/' + small_version)
         self.normal_image = pygame.image.load('Sprites/Objects/' + normal_version)
-        self.rect.center = coords  # 400, 200
+        self.rect.center = coords
 
     def update(self):
         x, y = pygame.mouse.get_pos()
