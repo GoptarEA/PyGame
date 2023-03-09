@@ -20,8 +20,8 @@ buttons_list = []
 
 class Button(pygame.Surface):
     def __init__(self, button_text, color, hovercolor, coords, onclickfunc=None):
-        super().__init__((pygame.font.Font(None, 30).render(button_text, 1, (0, 0, 0)).get_width() + 20,
-                          pygame.font.Font(None, 30).render(button_text, 1, (0, 0, 0)).get_height() + 15))
+        super().__init__((pygame.font.Font("Roboto-Medium.ttf", 30).render(button_text, 1, (0, 0, 0)).get_width() + 20,
+                          pygame.font.Font("Roboto-Medium.ttf", 30).render(button_text, 1, (0, 0, 0)).get_height() + 15))
         font = pygame.font.Font(None, 30)
         text = font.render(button_text, 1, (0, 0, 0))
         self.hovercolor = hovercolor
