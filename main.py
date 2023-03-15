@@ -51,6 +51,50 @@ class Button(pygame.Surface):
         else:
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
+class Bullet(pygame.sprite.Sprite):
+    def __init__(self, x, y):
+        pygame.sprite.Sprite.__init__(self)
+        self.image = pygame.Surface((10, 20))
+        self.image = pygame.image.load('Sprites/Objects/bullet.png')
+        self.rect = self.image.get_rect()
+        self.rect.bottom = y
+        self.rect.centerx = x
+        self.speedx = 10
+
+
+    def update(self):
+        self.rect.x += self.speedx
+        if self.rect.left > 800:
+            self.kill()
+
+class PauseGameButton(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.Surface((100, 50)).convert_alpha()
+        self.image.fill((255, 255, 255, 50))
+        self.rect = self.image.get_rect().move(30, 10)
+        font = pygame.font.Font(None, 30)
+        text = font.render("Пауза", 1, (50, 70, 0))
+        self.image.blit(text, ((100 - text.get_width()) // 2, 20))
+
+
+class PointsCount(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.Surface((50, 50)).convert_alpha()
+        self.image.fill((255, 255, 255, 50))
+        self.rect = self.image.get_rect().move(730, 10)
+        self.points = 100
+        font = pygame.font.Font(None, 30)
+        text = font.render(str(self.points), 1, (50, 70, 0))
+        self.image.blit(text, ((50 - text.get_width()) // 2, 20))
+
+    def increase_points(self):
+        self.points -= 5
+        self.image.fill((255, 255, 255, 50))
+        font = pygame.font.Font(None, 30)
+        text = font.render(str(self.points), 1, (50, 70, 0))
+        self.image.blit(text, ((50 - text.get_width()) // 2, 20))
 
 class GameRules(pygame.sprite.Sprite):
     def __init__(self):
@@ -62,6 +106,20 @@ class GameRules(pygame.sprite.Sprite):
         font = pygame.font.Font(None, 30)
         text = font.render("Текст правил игры", 1, (50, 70, 0))
         self.image.blit(text, ((500 - text.get_width()) // 2, 20))
+
+        text_rules1 = font.render("Нажимайте пробел чтобы ", 1, (50, 70, 0))
+        self.image.blit(text_rules1, ((500 - text_rules1.get_width()) // 2, 70))
+
+        text_rules2 = font.render("выполнить прыжок и S", 1,
+                                  (50, 70, 0))
+        self.image.blit(text_rules2, ((500 - text_rules2.get_width()) // 2, 100))
+
+        text_rules3 = font.render("чтобы стрелять по врагам", 1,
+                                  (50, 70, 0))
+        self.image.blit(text_rules3, ((500 - text_rules3.get_width()) // 2, 130))
+
+
+
         self.button1 = Button("Начинаем", (200, 0, 0, 100), (0, 255, 0, 100), (100, 250), self.start_game)
         buttons_list.append(self.button1)
         self.image.blit(self.button1, (100, 250))
@@ -76,6 +134,16 @@ class GameRules(pygame.sprite.Sprite):
         self.kill()
 
     def start_game(self):
+
+        self.kill()
+        bg.kill()
+        menu_play.kill()
+        menu_records.kill()
+        menu_settings.kill()
+
+        print(all_sprites_list)
+
+        generate_level(load_level("1.txt"))
         print("Игра началась")
 
 
@@ -99,15 +167,21 @@ def load_level(level_filename):
 
 
 def generate_level(level):
+    bg = Background()
+    all_sprites_list.add(bg)
+    all_sprites_list.add(pc)
+    all_sprites_list.add(PauseGameButton())
     for x in range(len(level)):
         if level[x] == '.':
-            PointElement("grey_point", x)
+            level_group.add(PointElement("grey_point", x))
         elif level[x] == ',':
-            PointElement("green_point", x)
+            level_group.add(PointElement("green_point", x))
         elif level[x] == '|':
-            PointElement("big_tower", x)
+            level_group.add(PointElement("big_tower", x))
         elif level[x] == '+':
-            PointElement("shape_point", x)
+            level_group.add(PointElement("shape_point", x))
+
+    player_group.add(Capitoshka())
 
 
 class MenuPoint(pygame.sprite.Sprite):
@@ -174,31 +248,30 @@ class Background(pygame.sprite.Sprite):
 
 
 class Camera:
-    def __init__(self, all_sprites_list, elements_group):
+    # зададим начальный сдвиг камеры
+    def __init__(self):
         self.dx = 0
-        self.all_sprites_list = all_sprites_list
-        self.elements_group = elements_group
 
+
+    # сдвинуть объект obj на смещение камеры
     def apply(self, obj):
         obj.rect.x += self.dx
 
+
+    # позиционировать камеру на объекте target
     def update(self, target):
         self.dx = -(target.rect.x + target.rect.w // 2 - 800 // 2)
-        for element in self.all_sprites_list:
-            self.apply(element)
 
-        for element in self.elements_group:
-            self.apply(element)
 
 
 class Capitoshka(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.image.load("Sprites/Objects/red_point.png")
+        self.image = pygame.image.load("Sprites/Objects/player.png")
         self.rect = self.image.get_rect()
         self.rect.w = self.rect.width
         self.rect.h = self.rect.height
-        self.rect.center = (300, 400)
+        self.rect.center = (70, 310)
         self.gravitation = 3
         self.current_time = time.time()
         self.is_jumping = False
@@ -218,7 +291,11 @@ class Capitoshka(pygame.sprite.Sprite):
         elif keys[pygame.K_RIGHT]:
             self.rect.x += 10
         elif keys[pygame.K_SPACE] and not self.is_jumping:
+            pc.increase_points()
             self.is_jumping = True
+
+    def shoot(self):
+        bullets.add(Bullet(self.rect.x + self.rect.width // 2, self.rect.y + self.rect.height // 2))
 
     def jump(self):
         if self.jump_counter >= -100:
@@ -237,29 +314,51 @@ pygame.display.set_caption("Jumper")
 pygame.display.set_icon(pygame.image.load('Sprites/Objects/icon.png'))
 
 all_sprites_list = pygame.sprite.Group()
+level_group = pygame.sprite.Group()
+player_group = pygame.sprite.Group()
+bullets = pygame.sprite.Group()
 
 # Создание фона игры
 bg = Background()
 all_sprites_list.add(bg)
 
+# Создание камеры
+camera = Camera()
+
+pc = PointsCount()
 
 # Создание меню
 menu_play = Play('play_small.png', 'play.png', (400, 200))
 menu_settings = Settings('settings_small.png', 'settings.png', (130, 250))
 menu_records = Records('records_small.png', 'records.png', (670, 250))
+
 all_sprites_list.add(menu_play)
 all_sprites_list.add(menu_settings)
 all_sprites_list.add(menu_records)
 
 
-
-pygame.display.update()
-generate_level(load_level('1.txt'))
-
-
-
 running = True
 while running:
+    if pc.points <= 0:
+        for sprite in all_sprites_list:
+            sprite.kill()
+
+        for player in player_group:
+            player.kill()
+
+        for point in level_group:
+            point.kill()
+        pc.points = 100
+
+        menu_play = Play('play_small.png', 'play.png', (400, 200))
+        menu_settings = Settings('settings_small.png', 'settings.png', (130, 250))
+        menu_records = Records('records_small.png', 'records.png', (670, 250))
+        bg = Background()
+        all_sprites_list.add(bg)
+        all_sprites_list.add(menu_play)
+        all_sprites_list.add(menu_settings)
+        all_sprites_list.add(menu_records)
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -275,13 +374,48 @@ while running:
         if event.type == pygame.MOUSEBUTTONDOWN:
             for bt in buttons_list:
                 bt.click(event.pos)
-
-
             menu_play.check_click(event.pos)
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_s:
+                for player in player_group:
+                    player.shoot()
+
+    pygame.sprite.groupcollide(level_group, bullets, False, True)
+
+    # jump_on = pygame.sprite.groupcollide(level_group, player_group, False, False)
+    # if jump_on:
+    #     for key, value in jump_on.items():
+    #         # if key.rect.x <= value[0].rect.x and key.rect.y <= value[0].rect.y:
+    #         if value[0].rect.x == key.rect.x:
+    #             value[0].rect.bottom = key.rect.top
+
+    for points in level_group:
+        for player in player_group:
+            if player.rect.right > points.rect.left and not player.is_jumping:
+                player.rect.bottom = points.rect.top - 10
+
+
+    for bullet in bullets:
+
+        bullet.update()
+
+
+    for player in player_group:
+        player.update()
+
+
 
     for sprite in all_sprites_list:
         sprite.update()
+
+
+
     all_sprites_list.draw(screen)
+    level_group.draw(screen)
+    player_group.draw(screen)
+    bullets.draw(screen)
+
+
 
     pygame.display.flip()
     clock.tick(60)
