@@ -448,12 +448,14 @@ class Capitoshka(pygame.sprite.Sprite):
             self.direction = 0
         elif keys[pygame.K_SPACE] and not self.is_jumping:
             print("сработал джамп")
+            player_jump.play()
             pc.increase_points()
             self.is_jumping = True
 
     def shoot(self):
         bullets.add(Bullet(self.rect.x + self.rect.width // 2, self.rect.y + self.rect.height // 2, self.direction))
         pc.increase_points()
+        shoot_sound.play()
 
     def jump(self):
         if self.jump_counter >= -120:
@@ -473,6 +475,11 @@ clock = pygame.time.Clock()
 screen = pygame.display.set_mode((800, 450))
 pygame.display.set_caption("Jumper")
 pygame.display.set_icon(pygame.image.load('Sprites/Objects/icon.png'))
+
+button_click = pygame.mixer.Sound('./Sounds/button_click.ogg')
+hit_enemy_sound = pygame.mixer.Sound('./Sounds/hit_enemy.ogg')
+player_jump = pygame.mixer.Sound('./Sounds/player_jump.ogg')
+shoot_sound = pygame.mixer.Sound('./Sounds/shoot_sound.wav')
 
 all_sprites_list = pygame.sprite.Group()
 level_group = pygame.sprite.Group()
@@ -557,6 +564,7 @@ while running:
                 bt.hover(event.pos)
 
         if event.type == pygame.MOUSEBUTTONDOWN:
+            button_click.play()
             for bt in buttons_list:
                 bt.click(event.pos)
             menu_play.check_click(event.pos)
@@ -576,6 +584,7 @@ while running:
 
     if hit_enemy:
         pc.decrease_points()
+        hit_enemy_sound.play()
 
     for points in level_group:
         camera.apply(points)
