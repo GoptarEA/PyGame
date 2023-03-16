@@ -154,6 +154,12 @@ class PointsCount(pygame.sprite.Sprite):
         text = font.render(str(self.points), 1, (50, 70, 0))
         self.image.blit(text, ((50 - text.get_width()) // 2, 20))
 
+    def refresh_point(self):
+        self.points = 100
+        self.image.fill((255, 255, 255, 50))
+        font = pygame.font.Font(None, 30)
+        text = font.render(str(self.points), 1, (50, 70, 0))
+        self.image.blit(text, ((50 - text.get_width()) // 2, 20))
 
 class GameRules(pygame.sprite.Sprite):
     def __init__(self):
@@ -196,7 +202,14 @@ class GameRules(pygame.sprite.Sprite):
             print(sprite)
             sprite.kill()
 
+        for enemy in enemies:
+            enemy.kill()
+        for point in level_group:
+            point.kill()
+
         print(all_sprites_list)
+        for player in player_group:
+            player.kill()
 
         generate_level(load_level("1.txt"))
         print("Игра началась")
@@ -238,7 +251,7 @@ class FinalWindow(pygame.sprite.Sprite):
 
 
     def start_game(self):
-
+        menu_play.make_freeze()
         for sprite in all_sprites_list:
             print(sprite)
             sprite.kill()
@@ -248,7 +261,10 @@ class FinalWindow(pygame.sprite.Sprite):
             print(sprite)
         print("-------------------")
         self.kill()
+        for player in player_group:
+            player.kill()
         generate_level(load_level("1.txt"))
+        print(pc.points)
         print("Игра началась")
 
 class PointElement(pygame.sprite.Sprite):
@@ -412,6 +428,7 @@ class Capitoshka(pygame.sprite.Sprite):
             self.rect.x += 10
             self.direction = 0
         elif keys[pygame.K_SPACE] and not self.is_jumping:
+            print("сработал джамп")
             pc.increase_points()
             self.is_jumping = True
 
@@ -420,11 +437,11 @@ class Capitoshka(pygame.sprite.Sprite):
         pc.increase_points()
 
     def jump(self):
-        if self.jump_counter >= -100:
+        if self.jump_counter >= -120:
             self.rect.y -= self.jump_counter / 2.5
             self.jump_counter -= 10
         else:
-            self.jump_counter = 100
+            self.jump_counter = 120
             self.is_jumping = False
 
 
@@ -466,7 +483,6 @@ while running:
     if pc.points <= 0:
         for sprite in all_sprites_list:
             sprite.kill()
-
         for player in player_group:
             player.kill()
 
@@ -476,9 +492,10 @@ while running:
             enemy.kill()
         for bullet in bullets:
             bullet.kill()
+        print("--------------")
+        print(all_sprites_list)
         all_sprites_list.add(FinalWindow("Вы проиграли"))
-        pc.points = 100
-
+        pc.refresh_point()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -523,8 +540,6 @@ while running:
 
     for player in player_group:
         player.update()
-
-
 
     for sprite in all_sprites_list:
         sprite.update()
