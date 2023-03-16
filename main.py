@@ -18,6 +18,49 @@ elements_group = pygame.sprite.Group()
 buttons_list = []
 
 
+# class Enemy(pygame.sprite.Sprite):
+#     def __init__(self, x, y):
+#         pygame.sprite.Sprite.__init__(self)
+#         self.image = pygame.Surface((10, 20))
+#         self.image = pygame.image.load('Sprites/Objects/enemy.png')
+#         self.rect = self.image.get_rect()
+#         self.rect.bottom = y
+#         self.rect.centerx = x
+#
+
+
+class AnimatedSprite(pygame.sprite.Sprite):
+    def __init__(self, sheet, columns, rows, x, y):
+        super().__init__()
+        self.frames = []
+        self.cut_sheet(sheet, columns, rows)
+        self.cur_frame = 0
+        self.image = self.frames[self.cur_frame]
+        self.rect = self.rect.move(x, y)
+        self.frame_count = 0
+
+    def cut_sheet(self, sheet, columns, rows):
+        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns,
+                                sheet.get_height() // rows)
+        for j in range(rows):
+            for i in range(columns):
+                frame_location = (self.rect.w * i, self.rect.h * j)
+                self.frames.append(sheet.subsurface(pygame.Rect(
+                    frame_location, self.rect.size)))
+
+    def update(self):
+        self.frame_count += 1
+        if self.frame_count % 10 == 0:
+            self.cur_frame = (self.cur_frame + 1) % len(self.frames)
+            self.image = self.frames[self.cur_frame]
+        if self.frame_count > 10 ** 20:
+            self.frame_count %= 10
+
+
+
+
+
+
 class Button(pygame.Surface):
     def __init__(self, button_text, color, hovercolor, coords, onclickfunc=None):
         super().__init__((pygame.font.Font("Roboto-Medium.ttf", 30).render(button_text, 1, (0, 0, 0)).get_width() + 20,
@@ -52,7 +95,7 @@ class Button(pygame.Surface):
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
 class Bullet(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y, direction):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface((10, 20))
         self.image = pygame.image.load('Sprites/Objects/bullet.png')
@@ -60,10 +103,11 @@ class Bullet(pygame.sprite.Sprite):
         self.rect.bottom = y
         self.rect.centerx = x
         self.speedx = 10
+        self.direction = 1 if not direction else -1
 
 
     def update(self):
-        self.rect.x += self.speedx
+        self.rect.x += self.speedx * self.direction
         if self.rect.left > 800:
             self.kill()
 
@@ -171,6 +215,7 @@ def generate_level(level):
     all_sprites_list.add(bg)
     all_sprites_list.add(pc)
     all_sprites_list.add(PauseGameButton())
+    all_sprites_list.add(AnimatedSprite(pygame.image.load("Sprites/Objects/Scan.png"), 8, 1, 50, 50))
     for x in range(len(level)):
         if level[x] == '.':
             level_group.add(PointElement("grey_point", x))
@@ -252,11 +297,9 @@ class Camera:
     def __init__(self):
         self.dx = 0
 
-
     # сдвинуть объект obj на смещение камеры
     def apply(self, obj):
         obj.rect.x += self.dx
-
 
     # позиционировать камеру на объекте target
     def update(self, target):
@@ -276,26 +319,33 @@ class Capitoshka(pygame.sprite.Sprite):
         self.current_time = time.time()
         self.is_jumping = False
         self.jump_counter = 100
+        self.direction = 0
 
     def animation(self):
         pass
 
     def update(self):
         # self.rect.y += self.gravitation
+        if self.direction:
+            self.image = pygame.image.load("Sprites/Objects/player_left.png")
+        else:
+            self.image = pygame.image.load("Sprites/Objects/player.png")
         if self.is_jumping:
             self.jump()
         pygame.key.set_repeat(0)
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:
             self.rect.x -= 10
+            self.direction = 1
         elif keys[pygame.K_RIGHT]:
             self.rect.x += 10
+            self.direction = 0
         elif keys[pygame.K_SPACE] and not self.is_jumping:
             pc.increase_points()
             self.is_jumping = True
 
     def shoot(self):
-        bullets.add(Bullet(self.rect.x + self.rect.width // 2, self.rect.y + self.rect.height // 2))
+        bullets.add(Bullet(self.rect.x + self.rect.width // 2, self.rect.y + self.rect.height // 2, self.direction))
 
     def jump(self):
         if self.jump_counter >= -100:
