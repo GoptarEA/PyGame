@@ -183,14 +183,14 @@ class GameRules(pygame.sprite.Sprite):
 
     def quit_rules(self):
         self.kill()
-        for enemy in enemies:
-            enemy.kill()
-        for point in level_group:
-            point.kill()
-        for player in player_group:
-            player.kill()
-        for sprite in all_sprites_list:
-            sprite.kill()
+        for cur_enemy in enemies:
+            cur_enemy.kill()
+        for cur_point in level_group:
+            cur_point.kill()
+        for cur_player in player_group:
+            cur_player.kill()
+        for cur_sprite in all_sprites_list:
+            cur_sprite.kill()
         all_sprites_list.add(bg)
         all_sprites_list.add(menu_play)
         all_sprites_list.add(menu_settings)
@@ -199,18 +199,18 @@ class GameRules(pygame.sprite.Sprite):
 
     def start_game(self):
         self.kill()
-        for sprite in all_sprites_list:
-            print(sprite)
-            sprite.kill()
+        for cur_sprite in all_sprites_list:
+            print(cur_sprite)
+            cur_sprite.kill()
 
-        for enemy in enemies:
-            enemy.kill()
-        for point in level_group:
-            point.kill()
+        for cur_enemy in enemies:
+            cur_enemy.kill()
+        for cur_point in level_group:
+            cur_point.kill()
 
         print(all_sprites_list)
-        for player in player_group:
-            player.kill()
+        for cur_player in player_group:
+            cur_player.kill()
 
         generate_level(load_level("1.txt"))
         print("Игра началась")
