@@ -57,14 +57,13 @@ class AnimatedSprite(pygame.sprite.Sprite):
             self.frame_count %= 10
 
 
-
-
-
-
 class Button(pygame.Surface):
     def __init__(self, button_text, color, hovercolor, coords, onclickfunc=None):
         super().__init__((pygame.font.Font("Roboto-Medium.ttf", 30).render(button_text, 1, (0, 0, 0)).get_width() + 20,
-                          pygame.font.Font("Roboto-Medium.ttf", 30).render(button_text, 1, (0, 0, 0)).get_height() + 15))
+                          pygame.font.Font("Roboto-Medium.ttf", 30).render(
+                              button_text,
+                              1,
+                              (0, 0, 0)).get_height() + 15))
         font = pygame.font.Font(None, 30)
         text = font.render(button_text, 1, (0, 0, 0))
         self.hovercolor = hovercolor
@@ -94,6 +93,7 @@ class Button(pygame.Surface):
         else:
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
+
 class Bullet(pygame.sprite.Sprite):
     def __init__(self, x, y, direction):
         pygame.sprite.Sprite.__init__(self)
@@ -105,11 +105,11 @@ class Bullet(pygame.sprite.Sprite):
         self.speedx = 10
         self.direction = 1 if not direction else -1
 
-
     def update(self):
         self.rect.x += self.speedx * self.direction
         if self.rect.left > 800:
             self.kill()
+
 
 class PauseGameButton(pygame.sprite.Sprite):
     def __init__(self):
@@ -140,6 +140,7 @@ class PointsCount(pygame.sprite.Sprite):
         text = font.render(str(self.points), 1, (50, 70, 0))
         self.image.blit(text, ((50 - text.get_width()) // 2, 20))
 
+
 class GameRules(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -161,8 +162,6 @@ class GameRules(pygame.sprite.Sprite):
         text_rules3 = font.render("чтобы стрелять по врагам", 1,
                                   (50, 70, 0))
         self.image.blit(text_rules3, ((500 - text_rules3.get_width()) // 2, 130))
-
-
 
         self.button1 = Button("Начинаем", (200, 0, 0, 100), (0, 255, 0, 100), (100, 250), self.start_game)
         buttons_list.append(self.button1)
@@ -211,20 +210,33 @@ def load_level(level_filename):
 
 
 def generate_level(level):
-    bg = Background()
-    all_sprites_list.add(bg)
+    level_bg = Background()
+    all_sprites_list.add(level_bg)
     all_sprites_list.add(pc)
     all_sprites_list.add(PauseGameButton())
-    all_sprites_list.add(AnimatedSprite(pygame.image.load("Sprites/Objects/Scan.png"), 8, 1, 50, 50))
+    count = -1
     for x in range(len(level)):
         if level[x] == '.':
-            level_group.add(PointElement("grey_point", x))
+            count += 1
+            level_group.add(PointElement("grey_point", count))
         elif level[x] == ',':
-            level_group.add(PointElement("green_point", x))
+            count += 1
+            level_group.add(PointElement("green_point", count))
         elif level[x] == '|':
-            level_group.add(PointElement("big_tower", x))
+            count += 1
+            level_group.add(PointElement("big_tower", count))
         elif level[x] == '+':
-            level_group.add(PointElement("shape_point", x))
+            count += 1
+            level_group.add(PointElement("shape_point", count))
+        elif level[x] == "*":
+            if "$" in level[x + 1:]:
+                enemies.add(AnimatedSprite(
+                    pygame.image.load("Sprites/Objects/Scan.png"),
+                    8,
+                    1,
+                    120 * count + 50,
+                    int("".join(level[x + 1: level.index("$", x + 1)]))
+                ))
 
     player_group.add(Capitoshka())
 
@@ -306,7 +318,6 @@ class Camera:
         self.dx = -(target.rect.x + target.rect.w // 2 - 800 // 2)
 
 
-
 class Capitoshka(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -367,6 +378,7 @@ all_sprites_list = pygame.sprite.Group()
 level_group = pygame.sprite.Group()
 player_group = pygame.sprite.Group()
 bullets = pygame.sprite.Group()
+enemies = pygame.sprite.Group()
 
 # Создание фона игры
 bg = Background()
@@ -458,12 +470,14 @@ while running:
     for sprite in all_sprites_list:
         sprite.update()
 
-
+    for enemy in enemies:
+        enemy.update()
 
     all_sprites_list.draw(screen)
     level_group.draw(screen)
     player_group.draw(screen)
     bullets.draw(screen)
+    enemies.draw(screen)
 
 
 
