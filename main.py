@@ -150,6 +150,7 @@ class PointsCount(pygame.sprite.Sprite):
         text = font.render(str(self.points), 1, (50, 70, 0))
         self.image.blit(text, ((50 - text.get_width()) // 2, 20))
 
+
 class GameRules(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -260,7 +261,6 @@ class FinalWindow(pygame.sprite.Sprite):
         all_sprites_list.add(menu_records)
         menu_play.make_freeze()
 
-
     def start_game(self):
         menu_play.make_freeze()
         for sprite in all_sprites_list:
@@ -277,6 +277,7 @@ class FinalWindow(pygame.sprite.Sprite):
         generate_level(load_level(str(CURRENT_LEVEL) + ".txt"))
         print(pc.points)
         print("Игра началась")
+
 
 class PointElement(pygame.sprite.Sprite):
     def __init__(self, element_type, pos_x):
@@ -411,6 +412,7 @@ class Camera:
         self.target_pos_x = 70
         self.dx = 0
 
+
 class Capitoshka(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
@@ -460,8 +462,10 @@ class Capitoshka(pygame.sprite.Sprite):
         else:
             self.jump_counter = 120
             self.is_jumping = False
+
     def refresh_position(self):
         self.rect.center = (70, 310)
+
 
 pygame.init()
 pygame.mixer.init()
@@ -603,4 +607,3 @@ while running:
 
     pygame.display.flip()
     clock.tick(60)
-
