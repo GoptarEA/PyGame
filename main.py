@@ -18,17 +18,6 @@ elements_group = pygame.sprite.Group()
 buttons_list = []
 
 
-# class Enemy(pygame.sprite.Sprite):
-#     def __init__(self, x, y):
-#         pygame.sprite.Sprite.__init__(self)
-#         self.image = pygame.Surface((10, 20))
-#         self.image = pygame.image.load('Sprites/Objects/enemy.png')
-#         self.rect = self.image.get_rect()
-#         self.rect.bottom = y
-#         self.rect.centerx = x
-#
-
-
 class AnimatedSprite(pygame.sprite.Sprite):
     def __init__(self, sheet, columns, rows, x, y):
         super().__init__()
@@ -336,7 +325,7 @@ def generate_level(level):
                     int("".join(level[x + 1: level.index("$", x + 1)]))
                 ))
 
-    player_group.add(Capitoshka())
+    player_group.add(cap)
 
 
 class MenuPoint(pygame.sprite.Sprite):
@@ -406,6 +395,7 @@ class Camera:
     # зададим начальный сдвиг камеры
     def __init__(self):
         self.dx = 0
+        self.target_pos_x = 70
 
     # сдвинуть объект obj на смещение камеры
     def apply(self, obj):
@@ -413,8 +403,12 @@ class Camera:
 
     # позиционировать камеру на объекте target
     def update(self, target):
-        self.dx = -(target.rect.x + target.rect.w // 2 - 800 // 2)
+        self.dx = self.target_pos_x - target.rect.x
+        self.target_pos_x = target.rect.x
 
+    def refresh_pos_x(self):
+        self.target_pos_x = 70
+        self.dx = 0
 
 class Capitoshka(pygame.sprite.Sprite):
     def __init__(self):
@@ -489,6 +483,8 @@ camera = Camera()
 
 pc = PointsCount()
 
+
+cap = Capitoshka()
 # Создание меню
 menu_play = Play('play_small.png', 'play.png', (400, 200))
 menu_settings = Settings('settings_small.png', 'settings.png', (130, 250))
@@ -504,6 +500,7 @@ GAME_WAS_STARTED = False
 running = True
 while running:
     if pc.points <= 0:
+        camera.refresh_pos_x()
         for sprite in all_sprites_list:
             sprite.kill()
         for player in player_group:
@@ -519,7 +516,9 @@ while running:
         print(all_sprites_list)
         all_sprites_list.add(FinalWindow("Вы проиграли!"))
         pc.refresh_point()
+
     elif len(enemies) == 0 and len(player_group) != 0:
+        camera.refresh_pos_x()
         for sprite in all_sprites_list:
             sprite.kill()
         for player in player_group:
@@ -571,21 +570,26 @@ while running:
         pc.decrease_points()
 
     for points in level_group:
+        camera.apply(points)
         for player in player_group:
             if player.rect.right > points.rect.left and not player.is_jumping:
                 player.rect.bottom = points.rect.top - 10
 
     for bullet in bullets:
         bullet.update()
+        camera.apply(bullet)
 
     for player in player_group:
         player.update()
+        camera.update(player)
 
     for sprite in all_sprites_list:
         sprite.update()
+        # camera.apply(sprite)
 
     for enemy in enemies:
         enemy.update()
+        camera.apply(enemy)
 
     all_sprites_list.draw(screen)
     level_group.draw(screen)
