@@ -247,14 +247,14 @@ class FinalWindow(pygame.sprite.Sprite):
 
     def back_to_menu(self):
         self.kill()
-        for enemy in enemies:
-            enemy.kill()
-        for point in level_group:
-            point.kill()
-        for player in player_group:
-            player.kill()
-        for sprite in all_sprites_list:
-            sprite.kill()
+        for cur_enemy in enemies:
+            cur_enemy.kill()
+        for cur_point in level_group:
+            cur_point.kill()
+        for cur_player in player_group:
+            cur_player.kill()
+        for cur_sprite in all_sprites_list:
+            cur_sprite.kill()
         all_sprites_list.add(bg)
         all_sprites_list.add(menu_play)
         all_sprites_list.add(menu_settings)
@@ -263,17 +263,17 @@ class FinalWindow(pygame.sprite.Sprite):
 
     def start_game(self):
         menu_play.make_freeze()
-        for sprite in all_sprites_list:
-            print(sprite)
-            sprite.kill()
+        for cur_sprite in all_sprites_list:
+            print(cur_sprite)
+            cur_sprite.kill()
         print(all_sprites_list)
         print("-------------------")
-        for sprite in all_sprites_list:
-            print(sprite)
+        for cur_sprite in all_sprites_list:
+            print(cur_sprite)
         print("-------------------")
         self.kill()
-        for player in player_group:
-            player.kill()
+        for cur_player in player_group:
+            cur_player.kill()
         generate_level(load_level(str(CURRENT_LEVEL) + ".txt"))
         print(pc.points)
         print("Игра началась")
