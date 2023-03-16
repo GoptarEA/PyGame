@@ -407,6 +407,7 @@ class Camera:
         self.target_pos_x = target.rect.x
 
     def refresh_pos_x(self):
+        print("Бфыл вызван рефреш", self.target_pos_x)
         self.target_pos_x = 70
         self.dx = 0
 
@@ -459,7 +460,8 @@ class Capitoshka(pygame.sprite.Sprite):
         else:
             self.jump_counter = 120
             self.is_jumping = False
-
+    def refresh_position(self):
+        self.rect.center = (70, 310)
 
 pygame.init()
 pygame.mixer.init()
@@ -500,6 +502,7 @@ GAME_WAS_STARTED = False
 running = True
 while running:
     if pc.points <= 0:
+        cap.refresh_position()
         camera.refresh_pos_x()
         for sprite in all_sprites_list:
             sprite.kill()
@@ -518,6 +521,7 @@ while running:
         pc.refresh_point()
 
     elif len(enemies) == 0 and len(player_group) != 0:
+        cap.refresh_position()
         camera.refresh_pos_x()
         for sprite in all_sprites_list:
             sprite.kill()
