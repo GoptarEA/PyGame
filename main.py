@@ -191,18 +191,65 @@ class GameRules(pygame.sprite.Sprite):
         self.kill()
 
     def start_game(self):
-
         self.kill()
-        bg.kill()
-        menu_play.kill()
-        menu_records.kill()
-        menu_settings.kill()
+        for sprite in all_sprites_list:
+            print(sprite)
+            sprite.kill()
 
         print(all_sprites_list)
 
         generate_level(load_level("1.txt"))
         print("Игра началась")
 
+
+class FinalWindow(pygame.sprite.Sprite):
+    def __init__(self, game_result):
+        super().__init__()
+        self.image = pygame.Surface((500, 300)).convert_alpha()
+        self.image.fill((255, 255, 255, 200))
+        self.rect = self.image.get_rect().move(150, 50)
+
+        font = pygame.font.Font(None, 30)
+        text = font.render(game_result, 1, (50, 70, 0))
+        self.image.blit(text, ((500 - text.get_width()) // 2, 20))
+
+        self.button1 = Button("В меню", (200, 0, 0, 100), (0, 255, 0, 100), (100, 250), self.start_game)
+        buttons_list.append(self.button1)
+        self.image.blit(self.button1, (100, 250))
+
+        self.button2 = Button("Отбой", (200, 0, 0, 100), (0, 255, 0, 100), (300, 250), self.back_to_menu)
+        buttons_list.append(self.button2)
+        self.image.blit(self.button2, (300, 250))
+
+    def back_to_menu(self):
+        self.kill()
+        for enemy in enemies:
+            enemy.kill()
+        for point in level_group:
+            point.kill()
+        for player in player_group:
+            player.kill()
+        for sprite in all_sprites_list:
+            sprite.kill()
+        all_sprites_list.add(bg)
+        all_sprites_list.add(menu_play)
+        all_sprites_list.add(menu_settings)
+        all_sprites_list.add(menu_records)
+
+
+    def start_game(self):
+
+        for sprite in all_sprites_list:
+            print(sprite)
+            sprite.kill()
+        print(all_sprites_list)
+        print("-------------------")
+        for sprite in all_sprites_list:
+            print(sprite)
+        print("-------------------")
+        self.kill()
+        generate_level(load_level("1.txt"))
+        print("Игра началась")
 
 class PointElement(pygame.sprite.Sprite):
     def __init__(self, element_type, pos_x):
@@ -224,8 +271,7 @@ def load_level(level_filename):
 
 
 def generate_level(level):
-    level_bg = Background()
-    all_sprites_list.add(level_bg)
+    all_sprites_list.add(bg)
     all_sprites_list.add(pc)
     all_sprites_list.add(PauseGameButton())
     count = -1
@@ -413,6 +459,7 @@ all_sprites_list.add(menu_play)
 all_sprites_list.add(menu_settings)
 all_sprites_list.add(menu_records)
 
+CURRENT_LEVEL = 1
 
 running = True
 while running:
@@ -425,16 +472,13 @@ while running:
 
         for point in level_group:
             point.kill()
+        for enemy in enemies:
+            enemy.kill()
+        for bullet in bullets:
+            bullet.kill()
+        all_sprites_list.add(FinalWindow("Вы проиграли"))
         pc.points = 100
 
-        menu_play = Play('play_small.png', 'play.png', (400, 200))
-        menu_settings = Settings('settings_small.png', 'settings.png', (130, 250))
-        menu_records = Records('records_small.png', 'records.png', (670, 250))
-        bg = Background()
-        all_sprites_list.add(bg)
-        all_sprites_list.add(menu_play)
-        all_sprites_list.add(menu_settings)
-        all_sprites_list.add(menu_records)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
