@@ -140,6 +140,20 @@ class PointsCount(pygame.sprite.Sprite):
         text = font.render(str(self.points), 1, (50, 70, 0))
         self.image.blit(text, ((50 - text.get_width()) // 2, 20))
 
+    def decrease_points(self):
+        self.points += 15
+        self.image.fill((255, 255, 255, 50))
+        font = pygame.font.Font(None, 30)
+        text = font.render(str(self.points), 1, (50, 70, 0))
+        self.image.blit(text, ((50 - text.get_width()) // 2, 20))
+
+    def extra_decrease(self):
+        self.points -= 50
+        self.image.fill((255, 255, 255, 50))
+        font = pygame.font.Font(None, 30)
+        text = font.render(str(self.points), 1, (50, 70, 0))
+        self.image.blit(text, ((50 - text.get_width()) // 2, 20))
+
 
 class GameRules(pygame.sprite.Sprite):
     def __init__(self):
@@ -326,10 +340,10 @@ class Capitoshka(pygame.sprite.Sprite):
         self.rect.w = self.rect.width
         self.rect.h = self.rect.height
         self.rect.center = (70, 310)
-        self.gravitation = 3
+        self.gravitation = 2
         self.current_time = time.time()
         self.is_jumping = False
-        self.jump_counter = 100
+        self.jump_counter = 120
         self.direction = 0
 
     def animation(self):
@@ -357,6 +371,7 @@ class Capitoshka(pygame.sprite.Sprite):
 
     def shoot(self):
         bullets.add(Bullet(self.rect.x + self.rect.width // 2, self.rect.y + self.rect.height // 2, self.direction))
+        pc.increase_points()
 
     def jump(self):
         if self.jump_counter >= -100:
@@ -444,23 +459,23 @@ while running:
 
     pygame.sprite.groupcollide(level_group, bullets, False, True)
 
-    # jump_on = pygame.sprite.groupcollide(level_group, player_group, False, False)
-    # if jump_on:
-    #     for key, value in jump_on.items():
-    #         # if key.rect.x <= value[0].rect.x and key.rect.y <= value[0].rect.y:
-    #         if value[0].rect.x == key.rect.x:
-    #             value[0].rect.bottom = key.rect.top
+    hit_enemy = pygame.sprite.groupcollide(enemies, bullets, True, True)
+
+    hit_player = pygame.sprite.groupcollide(player_group, enemies, False, True)
+
+    if hit_player:
+        pc.extra_decrease()
+
+    if hit_enemy:
+        pc.decrease_points()
 
     for points in level_group:
         for player in player_group:
             if player.rect.right > points.rect.left and not player.is_jumping:
                 player.rect.bottom = points.rect.top - 10
 
-
     for bullet in bullets:
-
         bullet.update()
-
 
     for player in player_group:
         player.update()
@@ -478,8 +493,6 @@ while running:
     player_group.draw(screen)
     bullets.draw(screen)
     enemies.draw(screen)
-
-
 
     pygame.display.flip()
     clock.tick(60)
