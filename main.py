@@ -253,7 +253,7 @@ class FinalWindow(pygame.sprite.Sprite):
         self.button1 = Button("В меню", (200, 0, 0, 100), (0, 255, 0, 100), (100, 250), self.back_to_menu)
         buttons_list.append(self.button1)
         self.image.blit(self.button1, (100, 250))
-        if game_result == "Вы проиграли!":
+        if game_result == "Вы проиграли!" or CURRENT_LEVEL == LEVELS_COUNT:
             self.button2 = Button("Заново", (200, 0, 0, 100), (0, 255, 0, 100), (300, 250), self.start_game)
             buttons_list.append(self.button2)
             self.image.blit(self.button2, (300, 250))
@@ -531,6 +531,8 @@ all_sprites_list.add(menu_play)
 all_sprites_list.add(menu_settings)
 all_sprites_list.add(menu_records)
 
+
+LEVELS_COUNT = 2
 CURRENT_LEVEL = 1
 GAME_WAS_STARTED = False
 
