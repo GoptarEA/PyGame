@@ -107,8 +107,31 @@ class PauseGameButton(pygame.sprite.Sprite):
         self.image.fill((255, 255, 255, 50))
         self.rect = self.image.get_rect().move(30, 10)
         font = pygame.font.Font(None, 30)
-        text = font.render("Пауза", 1, (50, 70, 0))
+        text = font.render("В меню", 1, (50, 70, 0))
         self.image.blit(text, ((100 - text.get_width()) // 2, 20))
+
+    def click(self, pos):
+        print(pos)
+        if self.rect.x <= pos[0] <= self.rect.x + self.rect.width and \
+                self.rect.y <= pos[1] <= self.rect.y + self.rect.height:
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+            self.kill()
+            for cur_enemy in enemies:
+                cur_enemy.kill()
+            for cur_point in level_group:
+                cur_point.kill()
+            for cur_player in player_group:
+                cur_player.kill()
+            for cur_sprite in all_sprites_list:
+                cur_sprite.kill()
+            all_sprites_list.add(bg)
+            all_sprites_list.add(menu_play)
+            all_sprites_list.add(menu_settings)
+            all_sprites_list.add(menu_records)
+            menu_play.make_freeze()
+
+        else:
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
 
 class PointsCount(pygame.sprite.Sprite):
@@ -301,7 +324,7 @@ def load_level(level_filename):
 def generate_level(level):
     all_sprites_list.add(bg)
     all_sprites_list.add(pc)
-    all_sprites_list.add(PauseGameButton())
+    all_sprites_list.add(gb)
     count = -1
     for x in range(len(level)):
         if level[x] == '.':
@@ -496,6 +519,7 @@ camera = Camera()
 
 pc = PointsCount()
 
+gb = PauseGameButton()
 
 cap = Capitoshka()
 # Создание меню
@@ -565,6 +589,7 @@ while running:
 
         if event.type == pygame.MOUSEBUTTONDOWN:
             button_click.play()
+            gb.click(event.pos)
             for bt in buttons_list:
                 bt.click(event.pos)
             menu_play.check_click(event.pos)
